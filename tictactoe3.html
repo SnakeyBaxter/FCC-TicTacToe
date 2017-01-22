@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Tic Tac Toe</title>
+<link href="tictactoe3.css" rel='stylesheet' type='text/css'>
+<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+	<div id="wrapper">
+		<h1>Tic Tac Toe</h1>
+		<div id="symbols">
+			<p>Choose Player Symbol</p>
+			<form id="symbol">
+			  <input type="radio" id="xpl" name="setsymbol" value="X" checked>X<br>
+			  <input type="radio" id="opl" name="setsymbol" value="O">O
+			  
+			</form> 
+			<button id="start">Start New Game</button>
+			<div id="message"></div>
+		</div>
+		
+		<div class="board">
+		  <div class="square" id="0"></div>
+		  <div class="square" id="1"></div>
+		  <div class="square" id="2"></div>
+		  <div class="square" id="3"></div>
+		  <div class="square" id="4"></div>
+		  <div class="square" id="5"></div>
+		  <div class="square" id="6"></div>
+		  <div class="square" id="7"></div>
+		  <div class="square" id="8"></div>
+		</div>
+	</div>
+	
+<script src="tictactoe3.js"></script>
+
+</body>
+</html>
