@@ -1,156 +1,200 @@
 $(document).ready(function(){
 	
-	var player;
+	var human;
 	var comp;
 	var turn = 0;
     var empty_squares;
-	var score;
+	var square = [] //holds the board status
 		
-	var boardval = [];
+	$(".board").hide(); //hide until start clicked
+	$("#panel").slideUp("fast");
 	
-    var boardObject = {
-        line1: [0,1,2],
-        line2: [3,4,5],
-        line3: [6,7,8],
-        line4: [0,3,6],
-        line5: [1,4,7],
-        line6: [2,5,8],
-        line7: [0,4,8],
-        line8: [2,4,6]
-    }
-	$(".board").hide();
+	var winlines =[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];  //winning combinations
+    var corners =[0,2,6,8]; //corner squares
 	
-	//winning combinations
-	//var winline =[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; //if an array adds up to 3 - player wins. 
-																					  //If an array adds up to 15 - comp wins.
-			
-	
-	function checkForSquare(){
-		var empty = [];
-		if(
-		   boardval[0]+boardval[1]+boardval[2] === 10 ||
-		   boardval[3]+boardval[4]+boardval[5] === 10 ||
-		   boardval[6]+boardval[7]+boardval[8] === 10 ||
-		   boardval[0]+boardval[3]+boardval[6] === 10 ||
-		   boardval[1]+boardval[4]+boardval[7] === 10 ||
-		   boardval[2]+boardval[5]+boardval[8] === 10 ||
-		   boardval[0]+boardval[4]+boardval[8] === 10 ||
-		   boardval[2]+boardval[4]+boardval[6] === 10){
-			   
-				winline.forEach(function(line){
-					console.log("THIS LINE " + line);
-				});
-				console.log("Finish line");
-		   }
-		
+	function insertMark(mark, location){
+		while(turn === 1){
+			document.getElementById(location).innerHTML = mark;
+			square[location] = mark;
+			empty_squares--;
+			$("#empty").html(empty_squares);
+			checkForWin(mark);
+			checkForDraw();
+			turn = 0;
+		}
 	}
 	
-	function checkForBlock(){
-		var block_array = [];
-		if(
-		   boardval[0]+boardval[1]+boardval[2] === 2 ||
-		   boardval[3]+boardval[4]+boardval[5] === 2 ||
-		   boardval[6]+boardval[7]+boardval[8] === 2 ||
-		   boardval[0]+boardval[3]+boardval[6] === 2 ||
-		   boardval[1]+boardval[4]+boardval[7] === 2 ||
-		   boardval[2]+boardval[5]+boardval[8] === 2 ||
-		   boardval[0]+boardval[4]+boardval[8] === 2 ||
-		   boardval[2]+boardval[4]+boardval[6] === 2){
-			   
-				console.log("Block required");
-				for(var i; i<boardval.length; i++){
-					if(boardval[i] === 0){
-						block_array.push(boardval[square]);
-						console.log(block_array);
-					}
+	function tryToWin(){
+		winlines.forEach(function(line){
+			if(square[line[0]] === comp && square[line[1]] === comp || square[line[1]] === comp && square[line[2]] === comp ||
+			   square[line[0]] === comp && square[line[2]] === comp){
+					for(var space = 0; space<line.length; space++){ 
+							if(square[space] === " "){
+								insertMark(comp, space);
+								return;
+								
+                            };
+						};
+					
 				}
-		   } else {
-			   checkForSquare();
-		   }
-		   
+		});
+		
+		checkForBlock(winlines);
+    
+	}  
+			  
+			
+	//if human player is one turn away from a winning combination - block it.
+	function checkForBlock(arr){
+		console.log("CHECKBLOCK");
+		for(var z=0; z<arr.length; z++){
+			var line = arr[z];
+			if(square[line[0]] === human && square[line[1]] === human || square[line[0]] === human && square[line[2]] === human 
+				|| square[line[1]] === human && square[line[2]] === human){
+						for(var i = 0; i<line.length; i++){
+							if(square[line[i]] === " "){
+									var space = line[i];
+									insertMark(comp, space);
+									break;
+							};
+						}
+						
+				}
+			};
+        
 	}
 	
-	
-	function checkForMove(){
-		console.log("Move somewhere");
-		checkForBlock();
+	function oppositeCorner(arr){
+		if(turn === 1){
+			var opp = [];
+			for(var y = 3; y>=0; y--){
+				opp.push(arr[y]);
+			}
+			
+			for(var i=0; i<arr.length; i++){
+				if(square[arr[i]] === human){
+				   console.log("OPPOSITE", [opp[i]]);
+				   if(square[opp[i]] === " "){
+					   var space = opp[i];
+					   insertMark(comp, space);
+				   }
+				} 
+			}
+        }
 	}
+    
+	function checkForMove(){ //check for non-blocking move
+    console.log("CHECKMOVE");
+		//debugger;
+        var others = [1,3,5,7];
+        var random = Math.floor(Math.random() * 5);
+        console.log(random);
+		if(square[0] == " " && square[2] === " " && square[6] == " " && square[8] == " "){
+            //choose random empty corner
+			var i = corners[random];
+            insertMark(comp,i);
+			return;
+        }
+		
+        else if(square[0] !== " " && square[2] !== " " && square[6] !== " " && square[8] !== " "){
+            //corners full choose center
+			insertMark(comp, "4");
+			return;
+        }
+		
+				
+		else {
+			var pos = others[random];
+			var space = square[pos];
+			insertMark(comp, space);
+			return;
+		}		
+	} 
 	
-	function compMove(square){
-		square = "suggest one";
-		checkForMove();
-		square.innerHTML = comp;
-		boardval[square] = 5;
-		checkForWin();
-        empty_squares--;
-		turn = 0;
-	}
-	
-	function checkForWin(){
-		if(
-		   boardval[0]+boardval[1]+boardval[2] === 3 ||
-		   boardval[3]+boardval[4]+boardval[5] === 3 ||
-		   boardval[6]+boardval[7]+boardval[8] === 3 ||
-		   boardval[0]+boardval[3]+boardval[6] === 3 ||
-		   boardval[1]+boardval[4]+boardval[7] === 3 ||
-		   boardval[2]+boardval[5]+boardval[8] === 3 ||
-		   boardval[0]+boardval[4]+boardval[8] === 3 ||
-		   boardval[2]+boardval[4]+boardval[6] === 3){
-			   
-				console.log("Well done, you won!");
-		   }
-		else if(
-		   boardval[0]+boardval[1]+boardval[2] === 15 ||
-		   boardval[3]+boardval[4]+boardval[5] === 15 ||
-		   boardval[6]+boardval[7]+boardval[8] === 15 ||
-		   boardval[0]+boardval[3]+boardval[6] === 15 ||
-		   boardval[1]+boardval[4]+boardval[7] === 15 ||
-		   boardval[2]+boardval[5]+boardval[8] === 15 ||
-		   boardval[0]+boardval[4]+boardval[8] === 15 ||
-		   boardval[2]+boardval[4]+boardval[6] === 15){
-			   
-				console.log("Bad luck, computer won");
-		   }
-	
-	
+	function checkForWin(player){
+       console.log("CHECKWIN");
+       winlines.forEach(function(line){
+			if(square[line[0]] === player && square[line[1]] === player && square[line[2]] === player){
+					$("#panel").html(player + " Wins!");
+					$("#panel").slideDown("slow");
+					endGame();
+				}
+			});
 	};
+	
+	function checkForDraw(){
+		if(empty_squares === 0){
+				$("#panel").html("It's a Draw!");
+				$("#panel").slideDown("slow");
+				endGame();
+			}
+	}
+	
+	function compMove(){
+		tryToWin();
+		oppositeCorner(corners);
+		//checkForMove();
+		
+	}
+	
+	//disable any further moves.
+	function endGame(){
+		turn = 2;
+		$(".square").off('click');  
+	} 
+    
+    //reset game
+    
+    $("#reset").click(reset);
+    
+	 function reset(){
+        turn = 0;
+        empty_squares = 9;
+	    square = [" ", " ", " ", " ", " ", " ", " ", " ", " "];
+        for(var i = 0; i < square.length; i++){
+            document.getElementById(i).innerHTML = " ";
+        }
+        $("#panel").html(" ");
+        $("#empty").html(" ");
+        $(".square").on('click'); 
+        $(".board").hide(); //hide until start clicked
+	    $("#panel").slideUp("fast");
+        $("#symbol").show();
+        
+     }
+	
+	
 	//set up board and player symbols
 	$("#start").click(function(){
-		boardval = [0,0,0,0,0,0,0,0,0]; //initialise board array
 		empty_squares = 9;
-		for(var j =0; j<9; j++){
-		$(".square")[j].innerHTML = "";
-		}
+	    square = [" ", " ", " ", " ", " ", " ", " ", " ", " "];
 		for(var i=0; i<2; i++){
-		if(symbol.setsymbol[i].checked){
-			player = symbol.setsymbol.value;
+			if(symbol.setsymbol[i].checked){
+				human = symbol.setsymbol.value;
 			}
 		}
-		if(player === "X"){
+		if(human === "X"){
 			comp = "O";
 		} else {
 			comp = "X";
+			turn = 1;
+			setTimeout(checkForMove, 1500);
 		}
-		 $(".board").show();
-		 
-		 console.log("Player =", player);
-		 console.log("AI =", comp);
+		$(".board").show();
+		$("#symbol").hide();
 	});
 	
-	//moves
-	
+	//human moves
 	$(".square").click(function(){
-		this.innerHTML = player;
-		console.log(this,this.innerHTML);
-		boardval[this.id] = 1;
-		console.log(boardval[this.id]);
-		checkForWin();
+		this.innerHTML = human;
+		square[this.id] = human;
+		checkForWin(human);
 		turn = 1;
         empty_squares--;
-		console.log(empty_squares);
 		if(turn === 1){
 			compMove();
 		}
+		$("#empty").html(empty_squares);
 		
 	});
 	
